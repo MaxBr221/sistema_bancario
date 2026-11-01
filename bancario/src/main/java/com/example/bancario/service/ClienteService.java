@@ -1,0 +1,74 @@
+package com.example.bancario.service;
+
+import com.example.bancario.dto.ClienteRequestDTO;
+import com.example.bancario.dto.ClienteResponseDTO;
+import com.example.bancario.model.Cliente;
+import com.example.bancario.model.StatusConta;
+import com.example.bancario.repository.ClienteRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class ClienteService {
+    private final ClienteRepository clienteRepository;
+
+    //cadastrar novo cliente
+    @Transactional
+    public void create(ClienteRequestDTO clienteRequestDTO){
+        if(clienteRepository.existsByCpf(clienteRequestDTO.cpf())){
+            throw new UsernameNotFoundException("Cliente já cadastrado!");
+        }
+        Cliente cliente = new Cliente();
+        cliente.setCpf(clienteRequestDTO.cpf());
+        cliente.setTelefone(cliente.getTelefone());
+        cliente.setCriadoEm(LocalDateTime.now());
+        cliente.setDataNascimento(clienteRequestDTO.dataNascimento());
+        cliente.setStatusConta(StatusConta.ATIVA);
+        cliente.setNomeCompleto(clienteRequestDTO.nomeCompleto());
+
+        clienteRepository.save(cliente);
+    }
+
+    //buscar usuário por id
+    public ClienteResponseDTO findById(Long id){
+        Cliente cliente = clienteRepository.findById(id)
+                .orElseThrow(()-> new UsernameNotFoundException("Usuário não encontrado!"));
+        return new ClienteResponseDTO(cliente);
+    }
+
+    //buscar todos os usuários
+    public List<ClienteResponseDTO> findAll(){
+
+        return clienteRepository.findAll()
+                .stream()
+                .map(cliente -> new ClienteResponseDTO(cliente))
+                .toList();
+    }
+    @Transactional
+    public ClienteResponseDTO update(Long id, ClienteRequestDTO clienteRequestDTO){
+        Cliente cliente = clienteRepository.findById(id)
+                .orElseThrow(()-> new UsernameNotFoundException("Usuário não cadastrado!"));
+
+        cliente.setNomeCompleto(clienteRequestDTO.nomeCompleto());
+        cliente.setTelefone(clienteRequestDTO.telefone());
+        cliente.setDataNascimento(clienteRequestDTO.dataNascimento());
+
+        Cliente clienteSalvo = clienteRepository.save(cliente);
+
+        return new ClienteResponseDTO(clienteSalvo);
+    }
+
+    public void delete(Long id){
+        Cliente cliente = clienteRepository.findById(id)
+            .orElseThrow(()-> new UsernameNotFoundException("Usuário não cadastrado!"));
+
+        clienteRepository.delete(cliente);
+    }
+
+}
