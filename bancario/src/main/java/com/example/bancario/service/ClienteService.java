@@ -6,6 +6,8 @@ import com.example.bancario.model.Cliente;
 import com.example.bancario.model.StatusConta;
 import com.example.bancario.repository.ClienteRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +22,7 @@ public class ClienteService {
 
     //cadastrar novo cliente
     @Transactional
-    public void create(ClienteRequestDTO clienteRequestDTO){
+    public ClienteResponseDTO create(ClienteRequestDTO clienteRequestDTO){
         if(clienteRepository.existsByCpf(clienteRequestDTO.cpf())){
             throw new UsernameNotFoundException("Cliente já cadastrado!");
         }
@@ -31,8 +33,8 @@ public class ClienteService {
         cliente.setDataNascimento(clienteRequestDTO.dataNascimento());
         cliente.setStatusConta(StatusConta.ATIVA);
         cliente.setNomeCompleto(clienteRequestDTO.nomeCompleto());
-
-        clienteRepository.save(cliente);
+        Cliente clienteSalvo = clienteRepository.save(cliente);
+        return new ClienteResponseDTO(clienteSalvo);
     }
 
     //buscar usuário por id
@@ -43,12 +45,10 @@ public class ClienteService {
     }
 
     //buscar todos os usuários
-    public List<ClienteResponseDTO> findAll(){
+    public Page<ClienteResponseDTO> findAll(Pageable pageable){
 
-        return clienteRepository.findAll()
-                .stream()
-                .map(cliente -> new ClienteResponseDTO(cliente))
-                .toList();
+        return clienteRepository.findAll(pageable)
+                .map(cliente -> new ClienteResponseDTO(cliente));
     }
     @Transactional
     public ClienteResponseDTO update(Long id, ClienteRequestDTO clienteRequestDTO){
