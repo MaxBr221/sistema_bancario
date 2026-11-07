@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 public class ClienteController {
     private final ClienteService clienteService;
 
-
     @PostMapping
     public ResponseEntity<ClienteResponseDTO> create(@RequestBody ClienteRequestDTO clienteDTO){
         ClienteResponseDTO clienteResponseDTO = clienteService.create(clienteDTO);

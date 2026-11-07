@@ -46,7 +46,6 @@ public class ClienteService {
 
     //buscar todos os usuários
     public Page<ClienteResponseDTO> findAll(Pageable pageable){
-
         return clienteRepository.findAll(pageable)
                 .map(cliente -> new ClienteResponseDTO(cliente));
     }
