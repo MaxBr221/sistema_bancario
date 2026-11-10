@@ -55,6 +55,56 @@ public class ContaBancariaService {
         return new TransacaoResponseDTO(transacaoSalva);
 
     }
+    @Transactional
+    public TransacaoResponseDTO saque(Long id, BigDecimal valorSaque){
+        ContaBancaria contaBancaria = contaBancariaRepository.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("Conta Bancaria não encontrada!"));
+        isAtiva(contaBancaria);
+
+        Transacao transacao = new Transacao();
+
+        ContaContabil contaCaixa =
+                contaContabilRepository.findByCodigo("1.01")
+                        .orElseThrow(() -> new RuntimeException("Conta Caixa não encontrada"));
+
+        ContaContabil contaDepositosClientes =
+                contaContabilRepository.findByCodigo("2.01")
+                        .orElseThrow(() -> new RuntimeException("Conta de depósitos não encontrada"));
+
+        if(valorSaque.compareTo(transacao.getValor()) > 0){
+            throw new IllegalArgumentException("Valor de saque maior que valor disponivel em conta.");
+        }
+
+        var valorAtual = transacao.getValor().subtract(valorSaque);
+        transacao.setStatus(StatusTransacao.PENDENTE);
+        transacao.setValor(valorAtual);
+        transacao.setCriadaEm(LocalDateTime.now());
+        transacao.setTipo(TipoTransacao.SAQUE);
+        Transacao transacaoSalva = transacaoRepository.save(transacao);
+        salvarLancamentoContabil(transacao, valorSaque, contaCaixa, contaDepositosClientes);
+        transacao.setStatus(StatusTransacao.CONCLUIDA);
+        transacao.setConcluidaEm(LocalDateTime.now());
+        transacaoRepository.save(transacaoSalva);
+
+        return new TransacaoResponseDTO(transacaoSalva);
+    }
+    @Transactional
+    public TransacaoResponseDTO transferencia(Long idContaDestino, BigDecimal valorTransferencia){
+        ContaBancaria contaBancaria = contaBancariaRepository.findById(idContaDestino)
+                .orElseThrow(() -> new UsernameNotFoundException("Conta Bancaria não encontrada!"));
+        isAtiva(contaBancaria);
+        //finalizar
+    }
+
+    private void isAtiva(ContaBancaria contaBancaria){
+        Cliente cliente = contaBancaria.getCliente();
+        if(cliente.getStatusConta() != StatusConta.ATIVA){
+            throw new IllegalArgumentException("Cliente não está ativo!");
+        }
+        if(contaBancaria.getStatus() != StatusConta.ATIVA){
+            throw new IllegalArgumentException("Erro, Conta Bancaria não ativa!");
+        }
+    }
 
 
     private void salvarLancamentoContabil(Transacao transacao, BigDecimal valorDeposito, ContaContabil contaCaixa, ContaContabil contaDepositosClientes){
@@ -75,15 +125,4 @@ public class ContaBancariaService {
         lancamentoContabilRespository.save(debito);
         lancamentoContabilRespository.save(credito);
     }
-
-    private void isAtiva(ContaBancaria contaBancaria){
-        Long clienteId = contaBancaria.getCliente().getId();
-        Cliente cliente = clienteRepository.findById(clienteId)
-                .orElseThrow(() -> new UsernameNotFoundException("Cliente não existente!"));
-
-        if(cliente.getStatusConta() != StatusConta.ATIVA){
-            throw new IllegalArgumentException("Erro, Conta Bancaria não ativa!");
-        }
-    }
-
 }
