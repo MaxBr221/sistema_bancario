@@ -4,6 +4,8 @@ package com.example.bancario.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
@@ -36,6 +38,9 @@ public class ContaBancaria {
 
     @Version
     private Long versao;
+
+    @Column(nullable = false)
+    private BigDecimal saldo;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime criadaEm = LocalDateTime.now();

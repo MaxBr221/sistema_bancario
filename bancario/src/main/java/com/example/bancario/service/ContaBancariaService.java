@@ -15,20 +15,19 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class ContaBancariaService {
     private final ContaBancariaRepository contaBancariaRepository;
-    private final ClienteRepository clienteRepository;
     private final TransacaoRepository transacaoRepository;
     private final LancamentoContabilRespository lancamentoContabilRespository;
     private final ContaContabilRepository contaContabilRepository;
 
     @Transactional
     public TransacaoResponseDTO deposito(Long id, BigDecimal valorDeposito){
-        if(valorDeposito.compareTo(BigDecimal.ZERO) <= 0){
-            throw new IllegalArgumentException("Não é possivel depositar valor menor ou igual a zero.");
-        }
         ContaBancaria contaBancaria = contaBancariaRepository.findById(id)
                 .orElseThrow(() -> new UsernameNotFoundException("Conta Bancaria não encontrada!"));
         isAtiva(contaBancaria);
 
+        if(valorDeposito.compareTo(BigDecimal.ZERO) <= 0){
+            throw new IllegalArgumentException("Não é possivel depositar valor menor ou igual a zero.");
+        }
         ContaContabil contaCaixa =
                 contaContabilRepository.findByCodigo("1.01")
                         .orElseThrow(() -> new RuntimeException("Conta Caixa não encontrada"));
@@ -52,8 +51,11 @@ public class ContaBancariaService {
         transacaoSalva.setConcluidaEm(LocalDateTime.now());
         transacaoRepository.save(transacaoSalva);
 
-        return new TransacaoResponseDTO(transacaoSalva);
+        BigDecimal saldo = transacao.getValor().add(valorDeposito);
+        contaBancaria.setSaldo(saldo);
+        contaBancariaRepository.save(contaBancaria);
 
+        return new TransacaoResponseDTO(transacaoSalva);
     }
     @Transactional
     public TransacaoResponseDTO saque(Long id, BigDecimal valorSaque){
@@ -74,28 +76,60 @@ public class ContaBancariaService {
         if(valorSaque.compareTo(transacao.getValor()) > 0){
             throw new IllegalArgumentException("Valor de saque maior que valor disponivel em conta.");
         }
-
-        var valorAtual = transacao.getValor().subtract(valorSaque);
         transacao.setStatus(StatusTransacao.PENDENTE);
-        transacao.setValor(valorAtual);
+        transacao.setValor(valorSaque);
         transacao.setCriadaEm(LocalDateTime.now());
         transacao.setTipo(TipoTransacao.SAQUE);
         Transacao transacaoSalva = transacaoRepository.save(transacao);
         salvarLancamentoContabil(transacao, valorSaque, contaCaixa, contaDepositosClientes);
-        transacao.setStatus(StatusTransacao.CONCLUIDA);
-        transacao.setConcluidaEm(LocalDateTime.now());
+        transacaoSalva.setStatus(StatusTransacao.CONCLUIDA);
+        transacaoSalva.setConcluidaEm(LocalDateTime.now());
         transacaoRepository.save(transacaoSalva);
+
+        BigDecimal saldo = transacao.getValor().subtract(valorSaque);
+        contaBancaria.setSaldo(saldo);
+        contaBancariaRepository.save(contaBancaria);
 
         return new TransacaoResponseDTO(transacaoSalva);
     }
     @Transactional
     public TransacaoResponseDTO transferencia(Long idContaDestino, BigDecimal valorTransferencia){
+        // verificar se a conta de origem está valida com auth
         ContaBancaria contaBancaria = contaBancariaRepository.findById(idContaDestino)
                 .orElseThrow(() -> new UsernameNotFoundException("Conta Bancaria não encontrada!"));
         isAtiva(contaBancaria);
-        //finalizar
-    }
 
+        ContaContabil contaCaixa =
+                contaContabilRepository.findByCodigo("1.01")
+                        .orElseThrow(() -> new RuntimeException("Conta Caixa não encontrada"));
+
+        ContaContabil contaDepositosClientes =
+                contaContabilRepository.findByCodigo("2.01")
+                        .orElseThrow(() -> new RuntimeException("Conta de depósitos não encontrada"));
+
+        Transacao transacao = new Transacao();
+
+        transacao.setContaDestino(contaBancaria);
+        transacao.setCriadaEm(LocalDateTime.now());
+        transacao.setTipo(TipoTransacao.TRANSFERENCIA);
+        transacao.setValor(valorTransferencia);
+        transacao.setStatus(StatusTransacao.PENDENTE);
+        transacao.setContaOrigem();
+        Transacao transacaoSalva = transacaoRepository.save(transacao);
+
+        salvarLancamentoContabil(transacao, valorTransferencia, contaCaixa, contaDepositosClientes);
+
+        transacaoSalva.setConcluidaEm(LocalDateTime.now());
+        transacaoSalva.setStatus(StatusTransacao.CONCLUIDA);
+
+        transacaoRepository.save(transacaoSalva);
+
+        BigDecimal saldo = transacao.getValor().add(valorTransferencia);
+        contaBancaria.setSaldo(saldo);
+        contaBancariaRepository.save(contaBancaria);
+
+        return new TransacaoResponseDTO(transacaoSalva);
+    }
     private void isAtiva(ContaBancaria contaBancaria){
         Cliente cliente = contaBancaria.getCliente();
         if(cliente.getStatusConta() != StatusConta.ATIVA){
@@ -105,8 +139,6 @@ public class ContaBancariaService {
             throw new IllegalArgumentException("Erro, Conta Bancaria não ativa!");
         }
     }
-
-
     private void salvarLancamentoContabil(Transacao transacao, BigDecimal valorDeposito, ContaContabil contaCaixa, ContaContabil contaDepositosClientes){
         LancamentoContabil debito = new LancamentoContabil();
         debito.setTransacao(transacao);

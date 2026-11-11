@@ -28,4 +28,10 @@ public class ContaBancariaController {
         log.info("Saque no id {}, efetuado no data {}", id, transacaoDTO.concluidaEm());
         return ResponseEntity.ok(transacaoDTO);
     }
+    @PostMapping
+    public ResponseEntity<TransacaoResponseDTO> transferencia(@PathVariable Long id, @RequestBody BigDecimal valorTransferencia){
+        TransacaoResponseDTO transacaoDTO = contaBancariaService.transferencia(id, valorTransferencia);
+        log.info("Transferencia no id:{}, na data de:{}", id, transacaoDTO.concluidaEm());
+        return ResponseEntity.ok(transacaoDTO);
+    }
 }
