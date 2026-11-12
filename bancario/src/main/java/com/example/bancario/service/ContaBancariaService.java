@@ -1,6 +1,6 @@
 package com.example.bancario.service;
 
-import com.example.bancario.dto.TransacaoResponseDTO;
+import com.example.bancario.dto.response.TransacaoResponseDTO;
 import com.example.bancario.model.*;
 import com.example.bancario.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -114,7 +114,7 @@ public class ContaBancariaService {
         transacao.setTipo(TipoTransacao.TRANSFERENCIA);
         transacao.setValor(valorTransferencia);
         transacao.setStatus(StatusTransacao.PENDENTE);
-        transacao.setContaOrigem();
+       // transacao.setContaOrigem();
         Transacao transacaoSalva = transacaoRepository.save(transacao);
 
         salvarLancamentoContabil(transacao, valorTransferencia, contaCaixa, contaDepositosClientes);

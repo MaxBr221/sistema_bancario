@@ -1,7 +1,7 @@
 package com.example.bancario.service;
 
-import com.example.bancario.dto.ClienteRequestDTO;
-import com.example.bancario.dto.ClienteResponseDTO;
+import com.example.bancario.dto.request.ClienteRequestDTO;
+import com.example.bancario.dto.response.ClienteResponseDTO;
 import com.example.bancario.model.Cliente;
 import com.example.bancario.model.StatusConta;
 import com.example.bancario.repository.ClienteRepository;
@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

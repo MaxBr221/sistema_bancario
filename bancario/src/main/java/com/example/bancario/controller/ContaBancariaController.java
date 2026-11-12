@@ -1,6 +1,6 @@
 package com.example.bancario.controller;
 
-import com.example.bancario.dto.TransacaoResponseDTO;
+import com.example.bancario.dto.response.TransacaoResponseDTO;
 import com.example.bancario.service.ContaBancariaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,25 +10,25 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 
 @RestController
-@RequestMapping("contaBacaria")
+@RequestMapping("/contaBacaria")
 @RequiredArgsConstructor
 @Slf4j
 public class ContaBancariaController {
     private final ContaBancariaService contaBancariaService;
 
-    @PostMapping
+    @PostMapping("/deposito")
     public ResponseEntity<TransacaoResponseDTO> deposito(@PathVariable Long id, @RequestBody BigDecimal valorDeposito){
         TransacaoResponseDTO transacaoDTO = contaBancariaService.deposito(id, valorDeposito);
         log.info("Deposito no id {}, e na data {} efetuando.", id, transacaoDTO.concluidaEm());
         return ResponseEntity.ok(transacaoDTO);
     }
-    @PostMapping
+    @PostMapping("/saque")
     public ResponseEntity<TransacaoResponseDTO> saque(@PathVariable Long id, @RequestBody BigDecimal valorSaque){
         TransacaoResponseDTO transacaoDTO = contaBancariaService.saque(id, valorSaque);
         log.info("Saque no id {}, efetuado no data {}", id, transacaoDTO.concluidaEm());
         return ResponseEntity.ok(transacaoDTO);
     }
-    @PostMapping
+    @PostMapping("/transferencia")
     public ResponseEntity<TransacaoResponseDTO> transferencia(@PathVariable Long id, @RequestBody BigDecimal valorTransferencia){
         TransacaoResponseDTO transacaoDTO = contaBancariaService.transferencia(id, valorTransferencia);
         log.info("Transferencia no id:{}, na data de:{}", id, transacaoDTO.concluidaEm());

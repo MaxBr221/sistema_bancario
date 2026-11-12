@@ -1,7 +1,7 @@
 package com.example.bancario.controller;
 
-import com.example.bancario.dto.ClienteRequestDTO;
-import com.example.bancario.dto.ClienteResponseDTO;
+import com.example.bancario.dto.request.ClienteRequestDTO;
+import com.example.bancario.dto.response.ClienteResponseDTO;
 import com.example.bancario.service.ClienteService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(name = "clientes")
+@RequestMapping("/clientes")
 @RequiredArgsConstructor
 @Slf4j
 public class ClienteController {

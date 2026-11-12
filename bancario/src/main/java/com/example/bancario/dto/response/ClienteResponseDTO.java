@@ -1,4 +1,4 @@
-package com.example.bancario.dto;
+package com.example.bancario.dto.response;
 
 import com.example.bancario.model.Cliente;
 import com.example.bancario.model.StatusConta;

@@ -1,4 +1,4 @@
-package com.example.bancario.dto;
+package com.example.bancario.dto.response;
 
 import com.example.bancario.model.StatusTransacao;
 import com.example.bancario.model.Transacao;
