@@ -35,10 +35,8 @@ public class ContaBancaria {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private StatusConta status = StatusConta.ATIVA;
-
     @Version
     private Long versao;
-
     @Column(nullable = false)
     private BigDecimal saldo;
 
