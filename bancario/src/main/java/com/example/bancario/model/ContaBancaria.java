@@ -22,10 +22,10 @@ public class ContaBancaria {
     @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
 
-    @Column(nullable = false, unique = true, length = 10)
+    @Column(nullable = false, length = 10)
     private String agencia;
 
-    @Column(nullable = false, unique = true, length = 20)
+    @Column(nullable = false, length = 20)
     private String numero;
 
     @Enumerated(EnumType.STRING)
@@ -37,8 +37,8 @@ public class ContaBancaria {
     private StatusConta status = StatusConta.ATIVA;
     @Version
     private Long versao;
-    @Column(nullable = false)
-    private BigDecimal saldo;
+    @Column(nullable = false, precision = 19, scale = 2)
+    private BigDecimal saldo = BigDecimal.ZERO;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime criadaEm = LocalDateTime.now();

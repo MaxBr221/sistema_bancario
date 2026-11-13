@@ -37,8 +37,8 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest){
-        UsernamePasswordAuthenticationToken userAndPass = new UsernamePasswordAuthenticationToken(loginRequest.login(), loginRequest.senha());
-        Authentication authentication = authenticationManager.authenticate(userAndPass);
+        UsernamePasswordAuthenticationToken clienteAndPass = new UsernamePasswordAuthenticationToken(loginRequest.login(), loginRequest.senha());
+        Authentication authentication = authenticationManager.authenticate(clienteAndPass);
         Cliente cliente = (Cliente) authentication.getPrincipal();
         String token = tokenConfig.generateToken(cliente);
         return ResponseEntity.ok(new LoginResponse(token));
