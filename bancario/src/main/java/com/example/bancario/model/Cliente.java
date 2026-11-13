@@ -33,7 +33,7 @@ public class Cliente implements UserDetails {
     private StatusConta statusConta;
     @Column(nullable = false)
     private LocalDateTime criadoEm;
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String login;
     @Column(nullable = false, unique = true)
     private String senha;
@@ -46,12 +46,12 @@ public class Cliente implements UserDetails {
 
     @Override
     public @Nullable String getPassword() {
-        return "";
+        return senha;
     }
 
     @Override
     public String getUsername() {
-        return "";
+        return login;
     }
 
     @Override

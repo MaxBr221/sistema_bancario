@@ -34,3 +34,7 @@ logging:
   level:
     org.flywaydb: DEBUG
     org.springframework.boot.autoconfigure.flyway: DEBUG
+api:
+  security:
+    token:
+      secret: ${JWT_SECRET:my-secret-key}

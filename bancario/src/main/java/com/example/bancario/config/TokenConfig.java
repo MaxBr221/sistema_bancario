@@ -6,6 +6,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.bancario.model.Cliente;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -14,7 +15,8 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class TokenConfig {
-    private String secret = "secret";
+    @Value("${api.security.token.secret}")
+    private String secret;
 
     public String generateToken(Cliente cliente){
         Algorithm algorithm = Algorithm.HMAC256(secret);
