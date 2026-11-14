@@ -19,12 +19,6 @@ import org.springframework.web.bind.annotation.*;
 public class ClienteController {
     private final ClienteService clienteService;
 
-    @PostMapping
-    public ResponseEntity<ClienteResponseDTO> create(@RequestBody ClienteRequestDTO clienteDTO){
-        ClienteResponseDTO clienteResponseDTO = clienteService.create(clienteDTO);
-        log.info("Cadastrado cliente com telefone e id {}, {}", clienteDTO.telefone(), clienteDTO.id());
-        return ResponseEntity.status(HttpStatus.CREATED).body(clienteResponseDTO);
-    }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id){
         clienteService.delete(id);

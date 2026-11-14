@@ -1,5 +1,6 @@
 package com.example.bancario.service;
 
+import com.example.bancario.dto.request.ContaBancariaRequest;
 import com.example.bancario.dto.response.TransacaoResponseDTO;
 import com.example.bancario.model.*;
 import com.example.bancario.repository.*;
@@ -18,7 +19,27 @@ public class ContaBancariaService {
     private final TransacaoRepository transacaoRepository;
     private final LancamentoContabilRespository lancamentoContabilRespository;
     private final ContaContabilRepository contaContabilRepository;
+    private final ClienteRepository clienteRepository;
 
+
+    @Transactional
+    public void criarContaBancaria(ContaBancariaRequest contaBancariaRequest){
+        if(contaBancariaRepository.existsByNumero(contaBancariaRequest.numero())){
+            throw new IllegalArgumentException("Conta já criada!");
+        }
+        if(!clienteRepository.existsByCpf(contaBancariaRequest.cliente().getCpf())){
+            throw new UsernameNotFoundException("Cliente não ativo ainda!");
+        }
+
+        ContaBancaria contaBancaria = new ContaBancaria();
+        contaBancaria.setCliente(contaBancaria.getCliente());
+        contaBancaria.setNumero(contaBancaria.getNumero());
+        contaBancaria.setAgencia(contaBancaria.getAgencia());
+        contaBancaria.setTipo(contaBancaria.getTipo());
+        contaBancaria.setCriadaEm(LocalDateTime.now());
+        contaBancaria.setStatus(StatusConta.ATIVA);
+        contaBancariaRepository.save(contaBancaria);
+    }
     @Transactional
     public TransacaoResponseDTO deposito(Long id, BigDecimal valorDeposito){
         ContaBancaria contaBancaria = contaBancariaRepository.findById(id)
