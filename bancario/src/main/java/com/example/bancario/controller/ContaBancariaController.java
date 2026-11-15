@@ -1,9 +1,12 @@
 package com.example.bancario.controller;
 
+import com.example.bancario.dto.request.ContaBancariaRequest;
+import com.example.bancario.dto.response.ContaBancariaResponse;
 import com.example.bancario.dto.response.TransacaoResponseDTO;
 import com.example.bancario.service.ContaBancariaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +18,14 @@ import java.math.BigDecimal;
 @Slf4j
 public class ContaBancariaController {
     private final ContaBancariaService contaBancariaService;
+
+    @PostMapping("/criarConta")
+    public ResponseEntity<ContaBancariaResponse> criarConta(@RequestBody ContaBancariaRequest contaBancariaRequest){
+        ContaBancariaResponse contaBancariaResponse = contaBancariaService.criarContaBancaria(contaBancariaRequest);
+        log.info("Criando conta do cliente com o cpf: {}, na agência {}", contaBancariaRequest.cliente().getCpf(),
+                contaBancariaRequest.agencia());
+        return ResponseEntity.status(HttpStatus.CREATED).body(contaBancariaResponse);
+    }
 
     @PostMapping("/deposito")
     public ResponseEntity<TransacaoResponseDTO> deposito(@PathVariable Long id, @RequestBody BigDecimal valorDeposito){
