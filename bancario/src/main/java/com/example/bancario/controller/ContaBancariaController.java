@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/contaBacaria")
@@ -44,5 +45,31 @@ public class ContaBancariaController {
         TransacaoResponseDTO transacaoDTO = contaBancariaService.transferencia(id, valorTransferencia);
         log.info("Transferencia no id:{}, na data de:{}", id, transacaoDTO.concluidaEm());
         return ResponseEntity.ok(transacaoDTO);
+    }
+    @GetMapping("/conta/{numero}")
+    public ResponseEntity<ContaBancariaResponse> consultaConta(@PathVariable String numero){
+        ContaBancariaResponse contaDTO = contaBancariaService.consultaConta(numero);
+        log.info("Buscando conta do cliente: {}", contaDTO.cliente().getNomeCompleto());
+        return ResponseEntity.ok(contaDTO);
+    }
+    @GetMapping("/saldo/{numero}")
+    public ResponseEntity<BigDecimal> consultaSaldo(@PathVariable String numero){
+        BigDecimal saldo = contaBancariaService.consultaSaldo(numero);
+        log.info("Buscando saldo");
+        return ResponseEntity.ok(saldo);
+    }
+    @GetMapping("/extrato/{numero}")
+    public ResponseEntity<List<TransacaoResponseDTO>> extratoBancario(@PathVariable String numero){
+        List<TransacaoResponseDTO> extratoTransacoes = contaBancariaService.extratoBancario(numero);
+        for (var t: extratoTransacoes){
+            log.info("Listando extrato da data: {}", t.concluidaEm());
+        }
+        return ResponseEntity.ok(extratoTransacoes);
+    }
+    @DeleteMapping("/desativar/{numero}")
+    public ResponseEntity<Void> desativarConta(@PathVariable String numero){
+        contaBancariaService.desativarConta(numero);
+        log.info("Desativando conta");
+        return ResponseEntity.noContent().build();
     }
 }
