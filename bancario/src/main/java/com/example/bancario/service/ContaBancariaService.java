@@ -190,6 +190,7 @@ public class ContaBancariaService {
             throw new IllegalArgumentException("Erro, Conta Bancaria não ativa!");
         }
     }
+    @Transactional
     public void desativarConta(String numero){
         ContaBancaria contaBancaria = contaBancariaRepository.findContaBancariaByNumero(numero)
                 .orElseThrow(()-> new UsernameNotFoundException("Conta Bancária não existente!"));
@@ -201,6 +202,27 @@ public class ContaBancariaService {
         }
         contaBancaria.setStatus(StatusConta.ENCERRADA);
         contaBancariaRepository.save(contaBancaria);
+    }
+    public void bloquearConta(String numero){
+        ContaBancaria contaBancaria = contaBancariaRepository.findContaBancariaByNumero(numero)
+                .orElseThrow(()-> new UsernameNotFoundException("Conta bancaria não existente!"));
+        isAtiva(contaBancaria);
+        contaBancaria.setStatus(StatusConta.BLOQUEADA);
+        contaBancariaRepository.save(contaBancaria);
+    }
+    public void desbloquearConta(String numero){
+        ContaBancaria contaBancaria = contaBancariaRepository.findContaBancariaByNumero(numero)
+                .orElseThrow(()-> new UsernameNotFoundException("Conta bancaria não existente!"));
+        Cliente cliente = contaBancaria.getCliente();
+        if(!clienteRepository.existsByCpf(cliente.getCpf())){
+            throw new UsernameNotFoundException("Usuário não existente!");
+        }
+        if(contaBancaria.getStatus() != StatusConta.BLOQUEADA){
+            throw new IllegalArgumentException("Essa conta não está bloqueada!");
+        }
+        contaBancaria.setStatus(StatusConta.ATIVA);
+        contaBancariaRepository.save(contaBancaria);
+
     }
     private void salvarLancamentoContabil(Transacao transacao, BigDecimal valorDeposito, ContaContabil contaCaixa, ContaContabil contaDepositosClientes){
         LancamentoContabil debito = new LancamentoContabil();

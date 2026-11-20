@@ -72,4 +72,16 @@ public class ContaBancariaController {
         log.info("Desativando conta");
         return ResponseEntity.noContent().build();
     }
+    @PostMapping("/bloquear/{numero}")
+    public ResponseEntity<Void> bloquearConta(@PathVariable String numero){
+        contaBancariaService.bloquearConta(numero);
+        log.info("Bloqueando conta bancaria!");
+        return ResponseEntity.noContent().build();
+    }
+    @PostMapping("/desbloquear/{numero}")
+    public ResponseEntity<Void> desbloquearConta(@PathVariable String numero){
+        contaBancariaService.desbloquearConta(numero);
+        log.info("Desbloqueando conta bancaria!");
+        return ResponseEntity.noContent().build();
+    }
 }
